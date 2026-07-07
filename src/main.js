@@ -2,7 +2,148 @@
 // JERRYSAGE INTERIORS — Interactive Features
 // =============================================
 
+// ---------- CLIENT-SIDE ROUTER ----------
+const routes = {
+    '/': 'home',
+    '/about': 'about',
+    '/services': 'services',
+    '/gallery': 'gallery',
+    '/testimonials': 'testimonials',
+    '/contact': 'contact',
+};
+
+// Additional sections to show alongside a page
+const sectionsByRoute = {
+    'home': ['home'],
+    'about': ['about'],
+    'services': ['services', 'why-us'],
+    'gallery': ['gallery'],
+    'testimonials': ['testimonials'],
+    'contact': ['contact'],
+};
+
+let isNavigating = false;
+
+function navigateTo(path) {
+    const route = routes[path] || 'home';
+    showPage(route);
+    history.pushState({ page: route }, '', path);
+    updateActiveNavLink(route);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    isNavigating = true;
+    setTimeout(() => { isNavigating = false; }, 300);
+}
+
+function showPage(pageId) {
+    const sectionIds = sectionsByRoute[pageId] || ['home'];
+
+    // Get all sections that are part of the page system
+    const allSections = document.querySelectorAll('section[id]');
+
+    allSections.forEach(section => {
+        section.classList.remove('active');
+    });
+
+    sectionIds.forEach(id => {
+        const section = document.getElementById(id);
+        if (section) {
+            section.classList.add('active');
+            // Trigger reveal animations
+            const revealed = section.querySelectorAll('[data-reveal]');
+            revealed.forEach(el => {
+                el.classList.remove('revealed');
+                // Force reflow
+                void el.offsetWidth;
+                el.classList.add('revealed');
+            });
+        }
+    });
+
+    // Update page title
+    const titles = {
+        'home': 'JerrySage Interiors – Premium Interiors | Asaba, Delta',
+        'about': 'About – JerrySage Interiors | Asaba, Delta',
+        'services': 'Our Services – JerrySage Interiors | Asaba, Delta',
+        'gallery': 'Gallery – JerrySage Interiors | Asaba, Delta',
+        'testimonials': 'Testimonials – JerrySage Interiors | Asaba, Delta',
+        'contact': 'Contact – JerrySage Interiors | Asaba, Delta',
+    };
+    document.title = titles[pageId] || titles['home'];
+}
+
+function updateActiveNavLink(pageId) {
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        const href = link.getAttribute('href');
+        const routeMap = {
+            '/': 'home',
+            '/about': 'about',
+            '/services': 'services',
+            '/gallery': 'gallery',
+            '/testimonials': 'testimonials',
+            '/contact': 'contact',
+        };
+        if (routeMap[href] === pageId) {
+            link.classList.add('active');
+        }
+    });
+}
+
+function getPathFromRoute() {
+    const path = window.location.pathname;
+    // Try exact match first
+    if (routes[path]) return path;
+    // Fallback to root
+    return '/';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+
+    // ---------- INITIALIZE ROUTER ----------
+    const initialPath = getPathFromRoute();
+    const initialRoute = routes[initialPath] || 'home';
+    
+    // Set initial active nav
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === initialPath) {
+            link.classList.add('active');
+        }
+    });
+
+    // Intercept nav link clicks
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a[href]');
+        if (!link) return;
+        const href = link.getAttribute('href');
+        if (routes[href] !== undefined) {
+            e.preventDefault();
+            // Close mobile menu if open
+            const navToggle = document.getElementById('navToggle');
+            const navMenu = document.getElementById('navMenu');
+            if (navToggle && navMenu) {
+                navToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            navigateTo(href);
+        }
+    });
+
+    // Handle browser back/forward
+    window.addEventListener('popstate', (e) => {
+        const path = getPathFromRoute();
+        const route = routes[path] || 'home';
+        showPage(route);
+        updateActiveNavLink(route);
+    });
+
+    // Show initial page (after preloader delay)
+    setTimeout(() => {
+        showPage(initialRoute);
+    }, 2100);
 
     // ---------- PRELOADER ----------
     const preloader = document.getElementById('preloader');
@@ -37,7 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const navbar = document.getElementById('navbar');
     const navToggle = document.getElementById('navToggle');
     const navMenu = document.getElementById('navMenu');
-    const navLinks = document.querySelectorAll('.nav-link');
 
     // Scroll effect
     window.addEventListener('scroll', () => {
@@ -46,7 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             navbar.classList.remove('scrolled');
         }
-        updateActiveLink();
     });
 
     // Mobile toggle
@@ -55,36 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
             navToggle.classList.toggle('active');
             navMenu.classList.toggle('active');
             document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
-        });
-    }
-
-    // Close mobile menu on link click
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            navToggle.classList.remove('active');
-            navMenu.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-    });
-
-    // Active link highlighting
-    function updateActiveLink() {
-        const sections = document.querySelectorAll('section[id]');
-        const scrollPos = window.scrollY + 120;
-
-        sections.forEach(section => {
-            const top = section.offsetTop;
-            const height = section.offsetHeight;
-            const id = section.getAttribute('id');
-
-            if (scrollPos >= top && scrollPos < top + height) {
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === '#' + id) {
-                        link.classList.add('active');
-                    }
-                });
-            }
         });
     }
 
@@ -103,7 +212,8 @@ document.addEventListener('DOMContentLoaded', () => {
         rootMargin: '0px 0px -50px 0px'
     });
 
-    revealElements.forEach(el => revealObserver.observe(el));
+    // Observe any remaining unrevealed elements
+    document.querySelectorAll('[data-reveal]:not(.revealed)').forEach(el => revealObserver.observe(el));
 
     // ---------- COUNTER ANIMATION ----------
     const counters = document.querySelectorAll('[data-count]');
@@ -118,7 +228,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, { threshold: 0.5 });
 
-    counters.forEach(counter => counterObserver.observe(counter));
+    function observeCounters() {
+        document.querySelectorAll('[data-count]').forEach(counter => {
+            counter.textContent = '0';
+            counterObserver.observe(counter);
+        });
+    }
+    observeCounters();
 
     function animateCounter(element, target) {
         const duration = 2000;
@@ -153,10 +269,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (index < 0) index = totalSlides - 1;
             if (index >= totalSlides) index = 0;
             currentSlide = index;
-            track.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+            // Show only the active card
+            cards.forEach((card, i) => {
+                card.classList.toggle('active', i === currentSlide);
+            });
 
             dots.forEach((dot, i) => {
                 dot.classList.toggle('active', i === currentSlide);
+            });
+        }
+
+        // Initialize: show first card
+        if (cards.length > 0) {
+            cards.forEach((card, i) => {
+                card.classList.toggle('active', i === 0);
             });
         }
 
@@ -172,10 +299,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Pause on hover
         const slider = document.querySelector('.testimonial-slider');
-        slider.addEventListener('mouseenter', () => clearInterval(autoSlide));
-        slider.addEventListener('mouseleave', () => {
-            autoSlide = setInterval(() => goToSlide(currentSlide + 1), 5000);
-        });
+        if (slider) {
+            slider.addEventListener('mouseenter', () => clearInterval(autoSlide));
+            slider.addEventListener('mouseleave', () => {
+                clearInterval(autoSlide);
+                autoSlide = setInterval(() => goToSlide(currentSlide + 1), 5000);
+            });
+        }
     }
 
     // ---------- CONTACT FORM ----------
@@ -212,9 +342,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    backToTop.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    if (backToTop) {
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
 
     // ---------- SMOOTH PARALLAX ON HERO ----------
     window.addEventListener('scroll', () => {

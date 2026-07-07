@@ -1,3 +1,9 @@
 {
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/(about|services|gallery|testimonials|contact)",
+      "destination": "/index.html"
+    }
+  ]
 }
