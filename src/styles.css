@@ -3,30 +3,6 @@
    Warm White · Gold Accents · Glassmorphism
    ============================================= */
 
-/* ---------- PAGE ROUTER ---------- */
-section[id] {
-    display: none;
-}
-
-section[id].active {
-    display: block;
-}
-
-section.hero[id].active {
-    display: flex;
-}
-
-@keyframes pageEnter {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 /* ---------- CSS VARIABLES ---------- */
 :root {
     --gold: #c6934a;
@@ -469,54 +445,19 @@ ul {
 .hero-image-bg {
     position: absolute;
     inset: 0;
-    background-image: url('https://images.pexels.com/photos/6077368/pexels-photo-6077368.jpeg?auto=compress&cs=tinysrgb&w=1600');
+    background-image: url('https://images.unsplash.com/photo-1618220179428-22790b461013?w=1600&q=80');
     background-size: cover;
     background-position: center;
-    filter: saturate(0.9) brightness(1.1);
-    opacity: 0.55;
+    filter: saturate(0.95) brightness(1.05);
+    opacity: 0.65;
 }
 
 .hero-gradient {
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(198, 147, 74, 0.15) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 90%, rgba(198, 147, 74, 0.08) 0%, transparent 50%),
-        radial-gradient(ellipse 40% 40% at 20% 80%, rgba(198, 147, 74, 0.06) 0%, transparent 50%),
-        linear-gradient(180deg, var(--bg-warm-2) 0%, var(--bg-warm) 40%, var(--bg-warm-3) 100%);
-}
-
-.hero-particles {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-}
-
-.particle {
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    background: var(--gold);
-    border-radius: 50%;
-    opacity: 0;
-    animation: particleFloat linear infinite;
-}
-
-@keyframes particleFloat {
-    0% {
-        transform: translateY(100vh) scale(0);
-        opacity: 0;
-    }
-    10% {
-        opacity: 0.4;
-    }
-    90% {
-        opacity: 0.4;
-    }
-    100% {
-        transform: translateY(-10vh) scale(1);
-        opacity: 0;
-    }
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(198, 147, 74, 0.10) 0%, transparent 50%),
+        linear-gradient(180deg, var(--bg-warm-2) 0%, transparent 30%, transparent 70%, var(--bg-warm-3) 100%);
 }
 
 .hero-overlay {
@@ -524,7 +465,7 @@ ul {
     inset: 0;
     z-index: 1;
     background:
-        linear-gradient(180deg, transparent 0%, rgba(250, 247, 242, 0.1) 40%, rgba(250, 247, 242, 0.6) 100%);
+        linear-gradient(180deg, transparent 0%, rgba(250, 247, 242, 0.05) 30%, rgba(250, 247, 242, 0.4) 100%);
 }
 
 .hero-content {
@@ -1548,36 +1489,59 @@ ul {
     color: var(--gold);
 }
 
-/* ---------- FLOATING WHATSAPP ---------- */
-.whatsapp-float {
+/* ---------- FLOATING ACTIONS (WhatsApp + Instagram) ---------- */
+.floating-actions {
     position: fixed;
     bottom: 32px;
-    left: 32px;
+    right: 32px;
     z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.float-btn {
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #25D366, #128C7E);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.6rem;
     color: #fff;
-    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.35);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     transition: var(--transition);
     text-decoration: none;
-    animation: whatsappPulse 2s ease-in-out infinite;
+    position: relative;
 }
 
-.whatsapp-float:hover {
+.float-btn:hover {
     transform: scale(1.1) translateY(-4px);
-    box-shadow: 0 8px 30px rgba(37, 211, 102, 0.5);
     color: #fff;
 }
 
-.whatsapp-tooltip {
+.float-btn-whatsapp {
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.35);
+    animation: whatsappPulse 2s ease-in-out infinite;
+}
+
+.float-btn-whatsapp:hover {
+    box-shadow: 0 8px 30px rgba(37, 211, 102, 0.5);
+}
+
+.float-btn-instagram {
+    background: linear-gradient(135deg, #f58529, #dd2a7b, #8134af);
+    box-shadow: 0 4px 20px rgba(221, 42, 123, 0.3);
+}
+
+.float-btn-instagram:hover {
+    box-shadow: 0 8px 30px rgba(221, 42, 123, 0.5);
+}
+
+.float-tooltip {
     position: absolute;
-    left: 68px;
+    right: 66px;
     top: 50%;
     transform: translateY(-50%);
     background: var(--text-dark);
@@ -1592,17 +1556,17 @@ ul {
     transition: var(--transition);
 }
 
-.whatsapp-tooltip::before {
+.float-tooltip::before {
     content: '';
     position: absolute;
-    left: -6px;
+    right: -6px;
     top: 50%;
     transform: translateY(-50%);
     border: 6px solid transparent;
-    border-right-color: var(--text-dark);
+    border-left-color: var(--text-dark);
 }
 
-.whatsapp-float:hover .whatsapp-tooltip {
+.float-btn:hover .float-tooltip {
     opacity: 1;
 }
 
@@ -1619,7 +1583,7 @@ ul {
 .back-to-top {
     position: fixed;
     bottom: 32px;
-    right: 32px;
+    left: 32px;
     z-index: 998;
     width: 48px;
     height: 48px;
@@ -1785,16 +1749,18 @@ ul {
     .container {
         padding: 0 16px;
     }
-    .whatsapp-float {
+    .floating-actions {
         bottom: 16px;
-        left: 16px;
+        right: 16px;
+    }
+    .float-btn {
         width: 48px;
         height: 48px;
         font-size: 1.3rem;
     }
     .back-to-top {
         bottom: 16px;
-        right: 16px;
+        left: 16px;
         width: 40px;
         height: 40px;
         font-size: 0.9rem;
